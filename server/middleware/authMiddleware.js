@@ -12,6 +12,9 @@ export const verifyToken = (req, res, next) => {
         req.user = verified; // Attach user data to request
         next();
     } catch (err) {
+        if(err instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({ error: "Session expired! Please log in again."})
+        }
         res.status(401).json({ error: "Invalid Token!" });
     }
 }

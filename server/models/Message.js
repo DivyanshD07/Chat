@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import mongoose from "mongoose";
+// import CryptoJS from "crypto-js";
 
 const messageSchema = new mongoose.Schema(
     {
@@ -13,7 +13,8 @@ const messageSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        message: {
+        // Encrypted field
+        encryptedMessage: {
             type: String,
             required: true,
         },
@@ -27,4 +28,21 @@ const messageSchema = new mongoose.Schema(
     }
 );
 
-const mongoose = mongoose.model("Message", messageSchema);
+// // Encryption before saving
+// messageSchema.pre("save", function( next ) {
+//     if(!this.isModified("encryptedMessage")) return next();
+
+//     const secretKey = process.env.MESSAGE_SECRET;
+//     this.encryptedMessage = CryptoJS.AES.encrypt(this.encryptedMessage, secretKey).toString(); //store encrypted message
+//     next();
+// });
+
+// // Decryption before saving
+// messageSchema.methods.decryptMessage = function () {
+//     const secretKey = process.env.MESSAGE_SECRET;
+//     const bytes = CryptoJS.AES.decrypt(this.encryptedMessage, secretKey);
+//     return bytes.toString(CryptoJS.enc.Utf8);
+// }
+
+const Message = mongoose.model("Message", messageSchema);
+export default Message;

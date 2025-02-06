@@ -19,8 +19,23 @@ export const searchUser = async (req, res) => {
 // Send Friend Requests
 export const sendFriendRequest = async (req, res) => {
     try {
-        const { userId } = req.user._id; // User sending request
+
+        // console.log("Request user:", req.user);
+
+        // if (!req.user || !req.user.id) { 
+        //     return res.status(401).json({ message: "Unauthorized: No user data found" });
+        // }
+
+        const userId = req.user.id; // User sending request
         const { recepientId } = req.body; // User receiving request
+
+
+        // console.log("Sender ID:", userId);
+        // console.log("Receiver ID:", recepientId);
+
+        if(!recepientId) {
+            return res.status(400).json({ message: "RecepientId is required "})
+        }
 
         // Check if recepient exists
         const recepient = await User.findById(recepientId);
@@ -39,14 +54,14 @@ export const sendFriendRequest = async (req, res) => {
 
         res.json({ message: "Friend Request sent successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: error.message });
     }
 }
 
 // User accepts or rejects friend requests
 export const respondToFriendRequest = async (req, res) => {
     try {
-        const { userId } = req.user._id;
+        const userId = req.user.id;
         const { senderId, action } = req.body;
 
         const user = await User.findById(userId);

@@ -55,11 +55,11 @@ export const loginUser = async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
-        res.status(200).json({ token, user });
+        res.status(200).json({ user });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -68,7 +68,12 @@ export const loginUser = async (req, res) => {
 // Logout user
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "None" });
+        res.clearCookie("token", { 
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === "production", 
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+            path: "/", 
+        });
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed" });

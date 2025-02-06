@@ -7,7 +7,10 @@ const router = express.Router();
 
 router.use(verifyToken);
 
-router.get("/me", async(req,res) => {
+router.get("/search", searchUser);
+router.post("/send-friend-request", sendFriendRequest);
+router.post("/respond-to-friend-request", respondToFriendRequest);
+router.get("/:userId", async(req,res) => {
     try {
         const user = await User.findById(req.user.id).select("-password");
         res.json(user);
@@ -15,9 +18,5 @@ router.get("/me", async(req,res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
-
-router.get("/search", searchUser);
-router.post("/send-friend-request", sendFriendRequest);
-router.post("/respond-to-friend-request", respondToFriendRequest);
 
 export default router;
