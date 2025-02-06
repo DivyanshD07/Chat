@@ -49,10 +49,28 @@ export const loginUser = async (req, res) => {
         }
 
         //Generate JWT Token
-        const  token = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+        // Store JWT in Cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         res.status(200).json({ token, user });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+}
+
+// Logout user
+export const logoutUser = async (req, res) => {
+    try {
+        res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "None" });
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Logout failed" });
     }
 }
