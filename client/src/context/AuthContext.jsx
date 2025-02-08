@@ -15,8 +15,9 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get("/api/auth/me", { withCredentials: true });
-                setUser(response.data); // Update state with user data
+                const response = await axios.get("http://localhost:5000/api/auth/me", { withCredentials: true });
+                const data = await response.json();
+                setUser(data); // Update state with user data
             } catch (error) {
                 console.log("Not logged in");
                 setUser(null);

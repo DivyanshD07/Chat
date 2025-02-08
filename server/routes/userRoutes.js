@@ -12,10 +12,12 @@ router.post("/send-friend-request", sendFriendRequest);
 router.post("/respond-to-friend-request", respondToFriendRequest);
 router.get("/:userId", async(req,res) => {
     try {
-        const user = await User.findById(req.user.id).select("-password");
+        const id = req.params;
+        console.log(id);
+        const user = await User.findById(id).select("-password");
         res.json(user);
     } catch (err) {
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: err });
     }
 });
 
