@@ -8,10 +8,10 @@ const router = express.Router();
 router.use(verifyToken);
 
 router.get("/friend/status", checkUserStatus)
+router.get("/friends", friendsList);
 router.get("/search", searchUser);
 router.post("/send-friend-request", sendFriendRequest);
 router.post("/respond-to-friend-request", respondToFriendRequest);
-router.get("/friends", friendsList);
 router.get("/friend-requests", friendRequestsReceived);
 router.get("/:userId", async(req,res) => {
     try {

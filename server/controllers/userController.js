@@ -110,11 +110,16 @@ export const friendsList = async (req, res) => {
 // Fetch the friend requests
 export const friendRequestsReceived = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).populate("friendRequests", "username email");
+        const user = await User.findById(req.user.id).populate("friendRequests", "username");
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
+
+        const friendRequests = user.friendRequests.map(request => ({
+            senderId: request._id,
+            senderName: request.username,
+        }))
 
         res.json(user.friendRequests);
     } catch (error) {
