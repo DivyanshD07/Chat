@@ -39,7 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/messages", messageRoutes);
 
-const onlineUsers = new Map();
+export const onlineUsers = new Map();
 
 // Secure websoket Connections
 io.use((socket, next) => {

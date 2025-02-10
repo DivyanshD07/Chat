@@ -1,4 +1,5 @@
 import User from "../models/User.js"
+import { onlineUsers } from "../index.js";
 
 // Search users by username
 export const searchUser = async (req, res) => {
@@ -33,8 +34,8 @@ export const sendFriendRequest = async (req, res) => {
         // console.log("Sender ID:", userId);
         // console.log("Receiver ID:", recepientId);
 
-        if(!recepientId) {
-            return res.status(400).json({ message: "RecepientId is required "})
+        if (!recepientId) {
+            return res.status(400).json({ message: "RecepientId is required " })
         }
 
         // Check if recepient exists
@@ -90,3 +91,58 @@ export const respondToFriendRequest = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 }
+
+// Fetch the friends list
+export const friendsList = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).populate("friends", "username email"); // Populate friends details
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        req.json(user.friends);
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+}
+
+// Fetch the friend requests
+export const friendRequestsReceived = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).populate("friendRequests", "username email");
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(user.friendRequests);
+    } catch (error) {
+        res.json(500).json({ error: "Server error" });
+    }
+};
+
+// Online or offline
+export const checkUserStatus = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const user = await User.findById(userId).populate("friends", "username");
+
+        if(!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Map through friends who are online
+        const friendsStatus = user.friends.map((friend) => ({
+            id: friend._id,
+            username: friend.username,
+            online: onlineUsers.has(friend._id.toString()),
+        }));
+
+        res.json({ friendsStatus });
+    } catch (error) {
+        console.error("Error fetching friends' online status:", error);
+        res.status(500).josn({ message: "Server error" });
+    }
+};
