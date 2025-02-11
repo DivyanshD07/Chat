@@ -27,11 +27,17 @@ connectDB();
 app.use(express.json())
 app.use(cors(
     {
-        origin: "*",
+        origin: "http://localhost:5173",
+        methods: "GET,POST,PUT,DELETE,OPTIONS",
         credentials: true,
+        allowedHeaders: ["Content-Type", "Authorization"]
     }
 )); // have to change this too .... for security reasons (Unauthorized can access right now have to change this so that only client_url can access)
 app.use(cookieParser());
+app.use((req, res, next) => {
+    console.log(`${req.method} request to ${req.url}`);
+    next();
+});
 app.get("/", (req, res) => {
     res.send("API is running...");
 })

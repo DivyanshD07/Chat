@@ -10,13 +10,13 @@ export const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null); // Store user data
     const [loading, setLoading] = useState(true);
+    const backendPort = import.meta.env.VITE_BACKEND_URL;
 
     // Fetch user on page refresh
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/auth/me", { withCredentials: true });
-                const data = await response.json();
+                const data = await axios.get(`${backendPort}/api/auth/me`, { withCredentials: true });
                 setUser(data); // Update state with user data
             } catch (error) {
                 console.log("Not logged in");
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
+            await axios.post(`${backendPort}/api/auth/logout`, {}, { withCredentials: true });
             setUser(null);
         } catch (error) {
             console.log("Logout failed");

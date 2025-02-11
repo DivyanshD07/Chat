@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
-import { AuthContext } from "./AuthContext";
+import { useAuth } from "./AuthContext";
 
 export const FriendsContext = createContext();
 
 export const FriendsProvider = ({ children }) => {
-    const { user } = useContext(AuthContext);
+    const { user } = useAuth();
     const [friends, setFriends] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -82,7 +82,7 @@ export const FriendsProvider = ({ children }) => {
     }, [user]);
 
     return (
-        <FriendsContext.Provider value={{ friends, onlineUsers, friendRequests, acceptFriendRequest, declineFriendRequest }}>
+        <FriendsContext.Provider value={{ user, friends, onlineUsers, friendRequests, acceptFriendRequest, declineFriendRequest }}>
             {children}
         </FriendsContext.Provider>
     )
