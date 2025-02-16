@@ -14,6 +14,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const backendPort = import.meta.env.VITE_BACKEND_URL;
   const socketRef = useRef(null);
+  const websocketPort = import.meta.env.VITE_WEBSOCKET_URL;
 
   useEffect(() => {
     socketRef.current = io(backendPort, { auth: { token: user?.token } });
@@ -43,8 +44,14 @@ const Chat = () => {
   useEffect(() => {
     if (!user) return;
 
-    socketRef.current = io(backendPort, { auth: { token: user?.token } })
-    
+    socketRef.current = io(
+      websocketPort,
+      {
+        auth: { token: user?.token },
+        transports: ["websocket"],
+        withCredentials: true
+      })
+
     socketRef.current.on("receive-message", (message) => {
       if (message.sender === selectedFriend?._id) {
         setMessages((prev) => [...prev, message]);

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
 import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -15,8 +16,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: "*" }, // have to change this ...........
-    credentials: true,
+    cors: {
+        origin: process.env.FRONTEND_URL, // have to change this ...........
+        credentials: true
+    }
 });
 
 
@@ -27,12 +30,23 @@ connectDB();
 app.use(express.json())
 app.use(cors(
     {
-        origin: "http://localhost:5173",
-        methods: "GET,POST,PUT,DELETE,OPTIONS",
+        origin: process.env.FRONTEND_URL,
         credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"]
     }
 )); // have to change this too .... for security reasons (Unauthorized can access right now have to change this so that only client_url can access)
+
+//
+app.options("*", (req, res) => {
+    res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.sendStatus(204); // Handle preflight OPTIONS request
+})
+
+
 app.use(cookieParser());
 app.use((req, res, next) => {
     console.log(`${req.method} request to ${req.url}`);
@@ -49,7 +63,7 @@ export const onlineUsers = new Map();
 
 // Secure websoket Connections
 io.use((socket, next) => {
-    const token = socket.handshake.auth.token; // Get token from WebSocket auth
+    const token = socket.handshake.auth.token || socket.handshake.query.token; // Get token from WebSocket author query
     if (!token) return next(new Error("Authentication error"));
 
     try {
@@ -74,7 +88,7 @@ io.on("connection", (socket) => {
     socket.on("send-message", async ({ receiverId, message }) => {
         try {
 
-            if(!socket.userId) return;
+            if (!socket.userId) return;
 
             // Store the message in MongoDB
             const newMessage = new MessageChannel({ sender: socket.userId, receiver: receiverId, message });
@@ -96,12 +110,16 @@ io.on("connection", (socket) => {
     })
 
     socket.on("disconnect", () => {
-        for (const [userId, socketId] of onlineUsers.entries()) {
-            if (socketId === socket.id) {
-                onlineUsers.delete(userId);
-                break;
-            }
+        const userIdToRemove = [...onlineUsers.entries()].find(([userId, socketId]) => socketId === socket.id);
+        if(userIdToRemove) {
+            onlineUsers.delete(userIdToRemove[0]);
         }
+        // for (const [userId, socketId] of onlineUsers.entries()) {
+        //     if (socketId === socket.id) {
+        //         onlineUsers.delete(userId);
+        //         break;
+        //     }
+        // }
         io.emit("online-users", Array.from(onlineUsers.keys()));
     });
 });

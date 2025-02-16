@@ -16,7 +16,14 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const data = await axios.get(`${backendPort}/api/auth/me`, { withCredentials: true });
+                const data = await axios.get(
+                    `${backendPort}/api/auth/me`, 
+                    { 
+                        withCredentials: true,
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
                 setUser(data); // Update state with user data
             } catch (error) {
                 console.log("Not logged in");

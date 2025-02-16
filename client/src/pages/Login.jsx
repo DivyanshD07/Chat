@@ -16,7 +16,15 @@ const Login = () => {
     try {
       console.log("attempting logging in with: ", email, password);
       console.log(backendPort);
-      const response = await axios.post(`${backendPort}/api/auth/login`, { email, password }, { withCredentials: true });
+      const response = await axios.post(
+        `${backendPort}/api/auth/login`, 
+        { email, password }, 
+        { 
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          }
+        });
       console.log("response received:", response.data.user);
       login(response.data.user);
       navigate("/chat");
